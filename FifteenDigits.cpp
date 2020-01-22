@@ -4,11 +4,11 @@ constexpr auto up = 8;
 constexpr auto down = 2;
 constexpr auto left = 4;
 constexpr auto right = 6;
-const int n = 3;
-const int num_open = 10000;//open表最大编号
-const int num_close = 10000;//close表最大编号
-int si[n][n] = { 1, 2, 3, 4, 5, 6, 7, 8, 0 };//{ 11,9,4,15,1,3,0,12,7,5,8,6,13,2,10,14 };//
-int sn[n][n] = { 1, 2, 3, 4, 0, 5, 6, 7, 8 };//{ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0 };//数码的目标状态
+const int n = 4;
+const int num_open = 100000;//open表最大编号
+const int num_close = 100000;//close表最大编号
+int si[n][n] = { 11,9,4,15,1,3,0,12,7,5,8,6,13,2,10,14 };
+int sn[n][n] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0 };//数码的目标状态
 int goal[n * n][2];//各个数字应在位置对照表
 //--------------------------------------------------
 struct ARRAY {
