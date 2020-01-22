@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+constexpr auto up = 8;
+constexpr auto down = 2;
+constexpr auto left = 4;
+constexpr auto right = 6;
 const int n = 3;
 const int num_open = 10000;//open表最大编号
 const int num_close = 10000;//close表最大编号
@@ -161,50 +165,6 @@ void swap(int* a, int* b)
 	return;
 }
 //--------------------------------------------------
-int up(struct ARRAY* sn)//0上移
-{
-	int x = sn->place0[0];
-	int y = sn->place0[1];
-	if (x == 0)//0在最上面,不能上移
-		return 0;
-	swap(&sn->s[x][y], &sn->s[x - 1][y]);
-	sn->place0[0]--;
-	return 1;
-}
-//-----------------------------------------------
-int down(struct ARRAY* sn)//0下移
-{
-	int x = sn->place0[0];
-	int y = sn->place0[1];
-	if (x == n - 1)//0在最下面,不能下移
-		return 0;
-	swap(&sn->s[x][y], &sn->s[x + 1][y]);
-	sn->place0[0]++;
-	return 1;
-}
-//-----------------------------------------------
-int left(struct ARRAY* sn)//0左移
-{
-	int x = sn->place0[0];
-	int y = sn->place0[1];
-	if (y == 0)//0在最左侧,不能左移
-		return 0;
-	swap(&sn->s[x][y], &sn->s[x][y - 1]);
-	sn->place0[1]--;
-	return 1;
-}
-//-----------------------------------------------
-int right(struct ARRAY* sn)//0右移
-{
-	int x = sn->place0[0];
-	int y = sn->place0[1];
-	if (y == n - 1)//0在最右侧,不能右移
-		return 0;
-	swap(&sn->s[x][y], &sn->s[x][y + 1]);
-	sn->place0[1]++;
-	return 1;
-}
-//--------------------------------------------------
 int search_table(struct TABLE* t, struct ARRAY* sn)//在open表中查找移动的数组是否之前出现过
 {
 	for (int i = 0; i < t->k; i++)
@@ -229,48 +189,51 @@ void add_table(struct TABLE* t, struct ARRAY* s)//把数组加入到open表中
 	return;
 }
 //--------------------------------------------------
+void check(struct ARRAY* p)
+{
+	p->prior = pclose->a + pclose->k - 1;
+	p->d++;
+	p->h = hx(p->s);
+	if (search_table(popen, p) + search_table(pclose, p) > 1)//在open表中和close表中查找是否已经存在
+		add_table(popen, p);
+}
+//--------------------------------------------------
 void expand(struct ARRAY* s0)//扩展数组
 {
 	add_table(pclose, s0);
 	delete_table(popen, 0);
-	struct ARRAY* pl = (struct ARRAY*)malloc(sizeof(struct ARRAY));//初始化向左移动的数组
-	struct ARRAY* pr = (struct ARRAY*)malloc(sizeof(struct ARRAY));//初始化向右移动的数组
-	struct ARRAY* pu = (struct ARRAY*)malloc(sizeof(struct ARRAY));//初始化向上移动的数组
-	struct ARRAY* pd = (struct ARRAY*)malloc(sizeof(struct ARRAY));//初始化向下移动的数组
-	*pu = *s0; *pd = *s0; *pl = *s0; *pr = *s0;
-	if (down(pd))//0下移，在open表中和close表中查找是否已经存在
+	int x = s0->place0[0];
+	int y = s0->place0[1];
+	struct ARRAY* p = (struct ARRAY*)malloc(sizeof(struct ARRAY));
+	if (x != n - 1)//0在最下面,不能下移
 	{
-		pd->prior = pclose->a + pclose->k - 1;
-		pd->d++;
-		pd->h = hx(pd->s);
-		if (search_table(popen, pd) + search_table(pclose, pd) > 1)
-			add_table(popen, pd);
+		*p = *s0;
+		swap(&p->s[x][y], &p->s[x + 1][y]);
+		p->place0[0]++;
+		check(p);
 	}
-	if (right(pr))//0右移，在open表中和close表中查找是否已经存在
+	if (y != n - 1)//0在最右侧,不能右移
 	{
-		pr->prior = pclose->a + pclose->k - 1;
-		pr->d++;
-		pr->h = hx(pr->s);
-		if (search_table(popen, pr) + search_table(pclose, pr) > 1)
-			add_table(popen, pr);
+		*p = *s0;
+		swap(&p->s[x][y], &p->s[x][y + 1]);
+		p->place0[1]++;
+		check(p);
 	}
-	if (left(pl))//0左移，在open表中和close表中查找是否已经存在
+	if (y != 0)//0在最左侧,不能左移
 	{
-		pl->prior = pclose->a + pclose->k - 1;
-		pl->d++;
-		pl->h = hx(pl->s);
-		if (search_table(popen, pl) + search_table(pclose, pl) > 1)
-			add_table(popen, pl);
+		*p = *s0;
+		swap(&p->s[x][y], &p->s[x][y - 1]);
+		p->place0[1]--;
+		check(p);
 	}
-	if (up(pu))//0上移，在open表中和close表中查找是否已经存在
+	if (x != 0)//0在最上面,不能上移
 	{
-		pu->prior = pclose->a + pclose->k - 1;
-		pu->d++;
-		pu->h = hx(pu->s);
-		if (search_table(popen, pu) + search_table(pclose, pu) > 1)
-			add_table(popen, pu);
+		*p = *s0;
+		swap(&p->s[x][y], &p->s[x - 1][y]);
+		p->place0[0]--;
+		check(p);
 	}
-	free(pu); free(pd); free(pl); free(pr);
+	free(p);
 	return;
 }
 //--------------------------------------------------
